@@ -99,7 +99,15 @@ public class LoadView {
      * @return the index in the listView of Stater.ser
      */
     private void getFiles(ListView<String> listView) {
-        throw new UnsupportedOperationException(); //replace this!
+        Path path = Paths.get("boards");
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, "*.ser")) {
+            for (Path file : stream) {
+                listView.getItems().add(file.getFileName().toString());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // throw new UnsupportedOperationException(); //replace this!
     }
 
     /**
@@ -109,7 +117,15 @@ public class LoadView {
      * @param boardsList a ListView populated with tetris.boards to load
      */
     private void selectBoard(Label selectBoardLabel, ListView<String> boardsList) throws IOException {
-        throw new UnsupportedOperationException(); //replace this!
+        String selectedBoard = boardsList.getSelectionModel().getSelectedItem();
+        if (selectedBoard != null) {
+            selectBoardLabel.setText(String.format("Currently playing: %s", selectedBoard));
+            tetrisView.model = new TetrisModel();
+            // tetrisView.update();
+
+        }
+
+        //throw new UnsupportedOperationException(); //replace this!
     }
 
     /**

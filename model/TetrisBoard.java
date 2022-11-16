@@ -143,7 +143,17 @@ public class TetrisBoard implements Serializable{
      * @return the y value where the piece will come to rest
      */
     public int placementHeight(TetrisPiece piece, int x) {
-        throw new UnsupportedOperationException(); //change this!
+        int result = 0;
+        int[] lowestYVals = piece.getLowestYVals();
+        for (int i = 0; i < lowestYVals.length; i++) {
+            int y = rowCounts[x+1] - lowestYVals[i];
+            if (y > result) {
+                result = y;
+            }
+        }
+        return result;
+
+        //throw new UnsupportedOperationException(); change this!
     }
 
     /**
@@ -166,7 +176,41 @@ public class TetrisBoard implements Serializable{
      * @return static int that defines result of placement
      */
     public int placePiece(TetrisPiece piece, int x, int y) {
-        throw new UnsupportedOperationException(); //replace this!
+        if (committed)
+            commit();
+
+        // backup grid
+        backupGrid();
+        int result = ADD_OK;
+        int piecex, piecey;
+        TetrisPoint body[] = piece.getBody();
+        for (int i = 0; i < body.length; i++) {
+            piecex = x + body[i].x;
+            piecey = y + body[i].y;
+            if (piecex < 0 || piecex >= width || piecey < 0 || piecey >= height) {
+                result = ADD_OUT_BOUNDS;
+                break;
+            }
+            if (tetrisGrid[piecex][piecey]) {
+                result = ADD_BAD;
+                break;
+            }
+            tetrisGrid[piecex][piecey] = true;
+
+            if (colCounts[piecex]>piecey+1)
+                colCounts[piecex] = piecey+1;
+            rowCounts[piecey]++;
+
+            if (rowCounts[piecey] == width)
+                result = ADD_ROW_FILLED;
+
+        }
+//        recompute max height
+        getMaxHeight();
+//        toString();
+        return result;
+
+        //throw new UnsupportedOperationException();// replace this!
     }
 
     /**
@@ -176,7 +220,48 @@ public class TetrisBoard implements Serializable{
      * @return number of rows cleared (useful for scoring)
      */
     public int clearRows() {
-        throw new UnsupportedOperationException(); //replace this!
+        // flag !committed problem
+        if (committed)
+            commit();
+        // backup grid
+        backupGrid = tetrisGrid.clone();
+
+        boolean filled = false;
+        int rowTo, rowFrom, rowsCleared = 0;
+        rowsCleared = 0;
+        for (rowTo = height - 1; rowTo >= 0; rowTo--) {
+            filled = true;
+            for (int col = 0; col < width; col++) {
+                if (!tetrisGrid[col][rowTo]) {
+                    filled = false;
+                    break;
+                }
+            }
+            if (filled) {
+                rowsCleared++;
+                rowCounts[rowTo] = 0;
+                for (int col = 0; col < width; col++) {
+                    tetrisGrid[col][rowTo] = false;
+                    colCounts[col]--;
+                }
+            } else {
+                rowFrom = rowTo + rowsCleared;
+                if (rowFrom != rowTo) {
+                    for (int col = 0; col < width; col++) {
+                        tetrisGrid[col][rowFrom] = tetrisGrid[col][rowTo];
+                        tetrisGrid[col][rowTo] = false;
+                    }
+                    rowCounts[rowFrom] = rowCounts[rowTo];
+                    rowCounts[rowTo] = 0;
+                }
+            }
+        }
+        getMaxHeight();
+        toString();
+        return rowsCleared;
+
+
+        //throw new UnsupportedOperationException(); //replace this!
     }
 
     /**

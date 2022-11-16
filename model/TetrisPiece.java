@@ -43,49 +43,56 @@ public class TetrisPiece implements Serializable {
      */
     public TetrisPiece(TetrisPoint[] points) {
         //your code here!
-        body = new TetrisPoint[points.length]; //initialize body to the same length as points
+        body = new TetrisPoint[points.length];
         for (int i = 0; i < points.length; i++) {
-            body[i] = new TetrisPoint(points[i]); //copy the points into body
-        } //end for
-        //now we need to find the lowest y value for each x value in the body
-        //first we need to find the max and min x values
-        int maxX = Integer.MIN_VALUE;
-        int minX = Integer.MAX_VALUE;
-        for (int i = 0; i < body.length; i++) {
-            if (body[i].x > maxX) {
-                maxX = body[i].x;
-            } //end if
-            if (body[i].x < minX) {
-                minX = body[i].x;
-            } //end if
-        } //end for
-        //now we know the max and min x values, so we can initialize lowestYVals
-        lowestYVals = new int[maxX - minX + 1];
-        //now we need to find the lowest y value for each x value in the body
-        for (int i = 0; i < lowestYVals.length; i++) {
-            lowestYVals[i] = Integer.MAX_VALUE;
-        } //end for
-        for (int i = 0; i < body.length; i++) {
-            if (body[i].y < lowestYVals[body[i].x - minX]) {
-                lowestYVals[body[i].x - minX] = body[i].y;
-            } //end if
-        } //end for
-        //now we need to find the width and height of the piece
-        int maxY = Integer.MIN_VALUE;
-        int minY = Integer.MAX_VALUE;
-        for (int i = 0; i < body.length; i++) {
-            if (body[i].y > maxY) {
-                maxY = body[i].y;
-            } //end if
-            if (body[i].y < minY) {
-                minY = body[i].y;
-            } //end if
-        } //end for
-        width = maxX - minX + 1;
-        height = maxY - minY + 1;
+            body[i] = new TetrisPoint(points[i]);
+        }
+        lowestYVals = new int[getWidth()];
+        for (int i = 0; i < getWidth(); i++) {
+            int lowestY = 0;
+            for (int j = 0; j < body.length; j++) {
+                if (body[j].x == i && body[j].y > lowestY) {
+                    lowestY = body[j].y;
+                }
+            }
+            lowestYVals[i] = lowestY;
+        }
 
+        //computeSize();
+        //computeLowestYVals();
 
     } //end constructor
+
+    /**
+     * private helper method to compute the lowestYVals of the piece
+     */
+    private void computeLowestYVals() {
+        lowestYVals = new int[width];
+        Arrays.fill(lowestYVals, height-1);
+        for (TetrisPoint p : body) {
+            if (lowestYVals[p.x] > p.y) {
+                lowestYVals[p.x] = p.y;
+            }
+        }
+    }
+
+    /**
+     * Private helper method that computes the height and width of the piece.
+     */
+    private void computeSize() {
+        int xMax, yMax;
+        xMax = yMax = 0;
+        for (TetrisPoint p : body) {
+            if (xMax < p.x) {
+                xMax = p.x;
+            }
+            if (yMax < p.y) {
+                yMax = p.y;
+            }
+        }
+        width = xMax + 1;
+        height = yMax + 1;
+    }
 
     /**
      * Alternate constructor for a piece, takes a String with the x,y body points
@@ -149,7 +156,36 @@ public class TetrisPiece implements Serializable {
      * @return true if objects are the same
      */
     public boolean equals(Object obj) {
-        throw new UnsupportedOperationException(); //replace this!
+        //standard equals() method
+        if (obj == null) {
+            return false;
+        } //end if
+        // standard instanceof pattern
+        if (!(obj instanceof TetrisPiece)) {
+            return false;
+        } //end if
+        //cast to TetrisPiece
+        TetrisPiece other = (TetrisPiece) obj;
+        //check if the two pieces have the same number of points
+        if (body.length != other.body.length) {
+            return false;
+        } //end if
+        //now we need to check if the two pieces have the same points
+        //we'll do this by checking if each point in this piece is in the other piece
+        for (int i = 0; i < body.length; i++) {
+            boolean found = false;
+            for (int j = 0; j < other.body.length; j++) {
+                if (body[i].equals(other.body[j])) {
+                    found = true;
+                } //end if
+            } //end for
+            if (!found) {
+                return false;
+            } //end if
+        } //end for
+        //if we get here, then the two pieces have the same points
+        return true;
+        //throw new UnsupportedOperationException(); //replace this!
     }
 
     /**
@@ -218,7 +254,20 @@ public class TetrisPiece implements Serializable {
      * @return a piece that is a linked list containing all rotations for the piece
      */
     public static TetrisPiece makeFastRotations(TetrisPiece root) {
-        throw new UnsupportedOperationException(); //replace this!
+        TetrisPiece current = new TetrisPiece(root.body);
+        TetrisPiece rootPiece = current;
+        while (true) {
+            TetrisPiece nextRotation = current.computeNextRotation();
+            if (rootPiece.equals(nextRotation)) {
+                current.next = rootPiece;
+                break;
+            } else {
+                current.next = nextRotation;
+                current = current.next;
+            } //end if
+        }
+        return rootPiece;
+        //throw new UnsupportedOperationException(); //replace this!
     }
 
     /**
@@ -228,7 +277,17 @@ public class TetrisPiece implements Serializable {
      * @return the next rotation of the given piece
      */
     public TetrisPiece computeNextRotation() {
-        throw new UnsupportedOperationException(); //replace this!
+        TetrisPiece next = new TetrisPiece(this.body);
+        for (int i = 0; i < next.body.length; i++) {
+            int x = next.body[i].x;
+            int y = next.body[i].y;
+            next.body[i].x = -y;
+            next.body[i].y = x;
+        } //end for
+        TetrisPiece temp = new TetrisPiece(next.body);
+
+        return temp;
+        //throw new UnsupportedOperationException(); //replace this!
     }
     /**
      * Print the points within the piece
@@ -268,5 +327,14 @@ public class TetrisPiece implements Serializable {
         // Make an array out of the collection
         TetrisPoint[] array = points.toArray(new TetrisPoint[0]);
         return array;
+    }
+
+    public boolean isFilled(int i, int j) {
+        for (int k = 0; k < body.length; k++) {
+            if (body[k].x == i && body[k].y == j) {
+                return true;
+            } //end if
+        } //end for
+        return false;
     }
 }

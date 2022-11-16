@@ -83,7 +83,17 @@ public class SaveView {
      * Save the board to a file 
      */
     public void saveBoard() {
-        throw new UnsupportedOperationException(); //replace this!!
+        String fileName = saveFileNameTextField.getText();
+        if (fileName.length() < 5 || !fileName.substring(fileName.length() - 4).equals(".ser")) {
+            saveFileErrorLabel.setText(saveFileNotSerError);
+            return;
+        }
+        File file = new File(fileName);
+        if (file.exists()) {
+            saveFileErrorLabel.setText(saveFileExistsError);
+            return;
+        }
+        //throw new UnsupportedOperationException(); //replace this!!
     }
 
 }

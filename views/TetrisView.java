@@ -163,30 +163,40 @@ public class TetrisView {
         //Make sure to return the focus to the borderPane once you're done!
         newButton.setOnAction(e -> {
             //TO DO!
+            model.newGame();
+            borderPane.requestFocus();
         });
 
         //configure this such that you restart the game when the user hits the startButton
         //Make sure to return the focus to the borderPane once you're done!
         startButton.setOnAction(e -> {
             //TO DO!
+            model.startGame();
+            borderPane.requestFocus();
         });
 
         //configure this such that you pause the game when the user hits the stopButton
         //Make sure to return the focus to the borderPane once you're done!
         stopButton.setOnAction(e -> {
             //TO DO!
+            model.stopGame();
+            borderPane.requestFocus();
         });
 
         //configure this such that the save view pops up when the saveButton is pressed.
         //Make sure to return the focus to the borderPane once you're done!
         saveButton.setOnAction(e -> {
             //TO DO!
+            createSaveView();
+            borderPane.requestFocus();
         });
 
         //configure this such that the load view pops up when the loadButton is pressed.
         //Make sure to return the focus to the borderPane once you're done!
         loadButton.setOnAction(e -> {
             //TO DO!
+            createLoadView();
+            borderPane.requestFocus();
         });
 
         //configure this such that you adjust the speed of the timeline to a value that
@@ -194,6 +204,8 @@ public class TetrisView {
         //focus to the borderPane once you're done!
         slider.setOnMouseReleased(e -> {
             //TO DO
+            timeline.setRate(slider.getValue());
+            borderPane.requestFocus();
         });
 
         //configure this such that you can use controls to rotate and place pieces as you like!!
@@ -205,7 +217,17 @@ public class TetrisView {
         borderPane.setOnKeyReleased(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent k) {
-                //TO DO
+                //TO DO - respond to key presses
+                if (k.getCode() == KeyCode.UP) {
+                    model.modelTick(TetrisModel.MoveType.ROTATE);
+                } else if (k.getCode() == KeyCode.DOWN) {
+                    model.modelTick(TetrisModel.MoveType.DROP);
+                } else if (k.getCode() == KeyCode.LEFT) {
+                    model.modelTick(TetrisModel.MoveType.LEFT);
+                } else if (k.getCode() == KeyCode.RIGHT) {
+                    model.modelTick(TetrisModel.MoveType.RIGHT);
+                }
+
             }
         });
 

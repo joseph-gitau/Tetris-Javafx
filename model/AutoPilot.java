@@ -47,7 +47,10 @@ public class AutoPilot implements TetrisPilot, Serializable {
      * @return  A number that evaluates the board.
      */
     public double evaluateBoard(TetrisBoard board) {
-        throw new UnsupportedOperationException(); //replace this!
+        // TODO: Implement this function
+        return 0;
+
+        //throw new UnsupportedOperationException(); //replace this!
     }
 
 
