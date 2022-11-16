@@ -47,19 +47,8 @@ public class TetrisPiece implements Serializable {
         for (int i = 0; i < points.length; i++) {
             body[i] = new TetrisPoint(points[i]);
         }
-        lowestYVals = new int[getWidth()];
-        for (int i = 0; i < getWidth(); i++) {
-            int lowestY = 0;
-            for (int j = 0; j < body.length; j++) {
-                if (body[j].x == i && body[j].y > lowestY) {
-                    lowestY = body[j].y;
-                }
-            }
-            lowestYVals[i] = lowestY;
-        }
-
-        //computeSize();
-        //computeLowestYVals();
+        computeSize();
+        computeLowestYVals();
 
     } //end constructor
 
@@ -70,7 +59,7 @@ public class TetrisPiece implements Serializable {
         lowestYVals = new int[width];
         Arrays.fill(lowestYVals, height-1);
         for (TetrisPoint p : body) {
-            if (lowestYVals[p.x] > p.y) {
+            if (p.y < lowestYVals[p.x]) {
                 lowestYVals[p.x] = p.y;
             }
         }
@@ -254,16 +243,16 @@ public class TetrisPiece implements Serializable {
      * @return a piece that is a linked list containing all rotations for the piece
      */
     public static TetrisPiece makeFastRotations(TetrisPiece root) {
-        TetrisPiece current = new TetrisPiece(root.body);
-        TetrisPiece rootPiece = current;
+        TetrisPiece currentPiece = new TetrisPiece(root.body);
+        TetrisPiece rootPiece = currentPiece;
         while (true) {
-            TetrisPiece nextRotation = current.computeNextRotation();
+            TetrisPiece nextRotation = currentPiece.computeNextRotation();
             if (rootPiece.equals(nextRotation)) {
-                current.next = rootPiece;
+                currentPiece.next = rootPiece;
                 break;
             } else {
-                current.next = nextRotation;
-                current = current.next;
+                currentPiece.next = nextRotation;
+                currentPiece = currentPiece.next;
             } //end if
         }
         return rootPiece;
@@ -277,16 +266,13 @@ public class TetrisPiece implements Serializable {
      * @return the next rotation of the given piece
      */
     public TetrisPiece computeNextRotation() {
-        TetrisPiece next = new TetrisPiece(this.body);
-        for (int i = 0; i < next.body.length; i++) {
-            int x = next.body[i].x;
-            int y = next.body[i].y;
-            next.body[i].x = -y;
-            next.body[i].y = x;
+        TetrisPoint[] rotated = new TetrisPoint[body.length];
+        for (int i = 0; i < body.length; i++) {
+            rotated[i] = new TetrisPoint(height - body[i].y - 1, body[i].x);
         } //end for
-        TetrisPiece temp = new TetrisPiece(next.body);
+        TetrisPiece computedRotation = new TetrisPiece(rotated);
 
-        return temp;
+        return computedRotation;
         //throw new UnsupportedOperationException(); //replace this!
     }
     /**

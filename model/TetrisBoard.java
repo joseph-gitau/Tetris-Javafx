@@ -143,16 +143,22 @@ public class TetrisBoard implements Serializable{
      * @return the y value where the piece will come to rest
      */
     public int placementHeight(TetrisPiece piece, int x) {
-        int result = 0;
-        int[] lowestYVals = piece.getLowestYVals();
-        for (int i = 0; i < lowestYVals.length; i++) {
-            int y = rowCounts[x+1] - lowestYVals[i];
-            if (y > result) {
-                result = y;
-            }
+        int[] yVals = piece.getLowestYVals();
+        int lowestY = 0;
+        for (int i = 0; i < yVals.length; i++) {
+            if (yVals[i] > lowestY)
+                lowestY = yVals[i];
         }
-        return result;
-
+        return lowestY + getColumnHeight(x);
+//        int result = 0;
+//        int[] lowestYVals = piece.getLowestYVals();
+//        for (int i = 0; i < lowestYVals.length; i++) {
+//            int colHeight = colCounts[x + i] - lowestYVals[i];
+//            if (colHeight > result)
+//                result = colHeight;
+//
+//        }
+//        return result;
         //throw new UnsupportedOperationException(); change this!
     }
 
@@ -176,38 +182,38 @@ public class TetrisBoard implements Serializable{
      * @return static int that defines result of placement
      */
     public int placePiece(TetrisPiece piece, int x, int y) {
-        if (committed)
+        // flag !committed is set to true in undo()
+        if (!committed) {
             commit();
-
-        // backup grid
+        }
+        committed = false;
         backupGrid();
+
         int result = ADD_OK;
-        int piecex, piecey;
+        int pieceX, pieceY;
+
         TetrisPoint body[] = piece.getBody();
         for (int i = 0; i < body.length; i++) {
-            piecex = x + body[i].x;
-            piecey = y + body[i].y;
-            if (piecex < 0 || piecex >= width || piecey < 0 || piecey >= height) {
+            pieceX = x+body[i].x;
+            pieceY = y+body[i].y;
+            if (pieceX < 0 || pieceX >= width || pieceY < 0 || pieceY >= height) {
                 result = ADD_OUT_BOUNDS;
                 break;
             }
-            if (tetrisGrid[piecex][piecey]) {
+            if (tetrisGrid[pieceX][pieceY]) {
                 result = ADD_BAD;
                 break;
             }
-            tetrisGrid[piecex][piecey] = true;
-
-            if (colCounts[piecex]>piecey+1)
-                colCounts[piecex] = piecey+1;
-            rowCounts[piecey]++;
-
-            if (rowCounts[piecey] == width)
+            tetrisGrid[pieceX][pieceY] = true;
+            if(colCounts[pieceX] < pieceY+1) {
+                colCounts[pieceX] = pieceY + 1;
+            }
+            rowCounts[pieceY]++;
+            if(rowCounts[pieceY] == width) {
                 result = ADD_ROW_FILLED;
-
+            }
         }
-//        recompute max height
         getMaxHeight();
-//        toString();
         return result;
 
         //throw new UnsupportedOperationException();// replace this!
@@ -221,10 +227,12 @@ public class TetrisBoard implements Serializable{
      */
     public int clearRows() {
         // flag !committed problem
-        if (committed)
+        if (committed) {
             commit();
+        }
+        //committed = false;
         // backup grid
-        backupGrid = tetrisGrid.clone();
+        backupGrid();
 
         boolean filled = false;
         int rowTo, rowFrom, rowsCleared = 0;

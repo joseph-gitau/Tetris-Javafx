@@ -164,15 +164,28 @@ public class TetrisView {
         newButton.setOnAction(e -> {
             //TO DO!
             model.newGame();
+            boolean isStarted = true;
+            // disable new button is game is started and is not over
+            // TO DO!
+            //return focus to borderPane
             borderPane.requestFocus();
+
         });
 
         //configure this such that you restart the game when the user hits the startButton
         //Make sure to return the focus to the borderPane once you're done!
         startButton.setOnAction(e -> {
             //TO DO!
+            // restart the game
             model.startGame();
+            //paintBoard();
+            boolean gameStarted = true;
+            // if game is started, then the start button should be disabled
+            if (gameStarted) {
+                startButton.setDisable(true);
+            }
             borderPane.requestFocus();
+
         });
 
         //configure this such that you pause the game when the user hits the stopButton
@@ -180,6 +193,9 @@ public class TetrisView {
         stopButton.setOnAction(e -> {
             //TO DO!
             model.stopGame();
+            // if game is stopped, then the start button should be enabled
+            startButton.setDisable(false);
+
             borderPane.requestFocus();
         });
 
@@ -220,12 +236,20 @@ public class TetrisView {
                 //TO DO - respond to key presses
                 if (k.getCode() == KeyCode.UP) {
                     model.modelTick(TetrisModel.MoveType.ROTATE);
+                    // keep the focus on the borderPane
+                    borderPane.requestFocus();
                 } else if (k.getCode() == KeyCode.DOWN) {
                     model.modelTick(TetrisModel.MoveType.DROP);
+                    // keep the focus on the borderPane
+                    borderPane.requestFocus();
                 } else if (k.getCode() == KeyCode.LEFT) {
-                    model.modelTick(TetrisModel.MoveType.LEFT);
-                } else if (k.getCode() == KeyCode.RIGHT) {
                     model.modelTick(TetrisModel.MoveType.RIGHT);
+                    // keep the focus on the borderPane
+                    borderPane.requestFocus();
+                } else if (k.getCode() == KeyCode.RIGHT) {
+                    model.modelTick(TetrisModel.MoveType.LEFT);
+                    // keep the focus on the borderPane
+                    borderPane.requestFocus();
                 }
 
             }

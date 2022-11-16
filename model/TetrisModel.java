@@ -119,7 +119,9 @@ public class TetrisModel implements Serializable {
 
         // commit things the way they are
         board.commit();
-        currentPiece = null;
+        currentPiece = newPiece;
+        //currentPiece = newPiece;
+        //currentPiece = null;
 
         TetrisPiece piece = pickNextPiece();
 
